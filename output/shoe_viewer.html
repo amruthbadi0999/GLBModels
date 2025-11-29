@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>shoe - 3D Model Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        background: #111;
+        display: flex;
+        justify-content: center;
+      }
+      model-viewer {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <model-viewer 
+      src="shoe_final.glb"
+      camera-controls
+      touch-action="pan-y"
+      environment-image="studio_small_09.hdr"
+      auto-rotate
+      exposure="1.2"
+      interaction-prompt="auto"
+      ar
+      ar-modes="webxr scene-viewer"
+      ar-scale="fixed"
+      camera-target="0m 0m 0m"
+      camera-orbit="45deg 60deg 2.5m"
+      shadow-intensity="1">
+      
+      <div class="progress-bar" slot="progress-bar">
+        <div class="update-bar"></div>
+      </div>
+      
+      <button slot="ar-button" id="ar-button">
+        View in your space
+      </button>
+      
+    </model-viewer>
+    
+    <script>
+      const modelViewer = document.querySelector('model-viewer');
+      
+      // Handle AR mode
+      modelViewer.addEventListener('ar-status', (event) => {
+        console.log('AR Status:', event.detail.status);
+      });
+      
+      // Handle model load
+      modelViewer.addEventListener('load', () => {
+        console.log('Model loaded successfully');
+      });
+      
+      // Handle errors
+      modelViewer.addEventListener('error', (event) => {
+        console.error('Model loading error:', event.detail);
+      });
+    </script>
+  </body>
+</html>
