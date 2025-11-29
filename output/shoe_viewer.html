@@ -1,65 +1,244 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>shoe - 3D Model Viewer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <script type="module" src="https://unpkg.com/@google/model-viewer@^2.1.1/dist/model-viewer.min.js"></script>
     <style>
-      body {
-        margin: 0;
-        background: #111;
-        display: flex;
-        justify-content: center;
-      }
-      model-viewer {
-        width: 100vw;
-        height: 100vh;
-      }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        model-viewer {
+            width: 100%;
+            height: 70vh;
+            min-height: 500px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 1rem 0;
+            --poster-color: #f5f5f5;
+        }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            color: #666;
+            background: rgba(255,255,255,0.9);
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        button.secondary:hover {
+            background: #d0d0d0;
+        }
+        .ar-button {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        .ar-button.hidden {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            model-viewer {
+                height: 60vh;
+                min-height: 400px;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
-  </head>
-  <body>
-    <model-viewer 
-      src="shoe_final.glb"
-      camera-controls
-      touch-action="pan-y"
-      environment-image="studio_small_09.hdr"
-      auto-rotate
-      exposure="1.2"
-      interaction-prompt="auto"
-      ar
-      ar-modes="webxr scene-viewer"
-      ar-scale="fixed"
-      camera-target="0m 0m 0m"
-      camera-orbit="45deg 60deg 2.5m"
-      shadow-intensity="1">
-      
-      <div class="progress-bar" slot="progress-bar">
-        <div class="update-bar"></div>
-      </div>
-      
-      <button slot="ar-button" id="ar-button">
-        View in your space
-      </button>
-      
-    </model-viewer>
+</head>
+<body>
+    <div class="header">
+        <h1>shoe - 3D Model Viewer</h1>
+        <p>Drag to rotate • Scroll to zoom • Right-click to pan</p>
+    </div>
+    
+    <div class="container">
+        <model-viewer 
+            id="model"
+            src="./shoe_final.glb"
+            alt="3D model of shoe"
+            auto-rotate
+            camera-controls
+            shadow-intensity="1"
+            exposure="0.8"
+            environment-image="neutral"
+            shadow-softness="0.5"
+            camera-orbit="45deg 60deg 2.5m"
+            touch-action="pan-y"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            ar-scale="fixed"
+            xr-environment>
+            
+            <div class="loading" slot="progress-bar">
+                Loading shoe model...
+            </div>
+            
+            <button slot="ar-button" id="ar-button" class="ar-button">
+                👆 View in AR
+            </button>
+            
+        </model-viewer>
+        
+        <div class="controls">
+            <button id="rotate-btn">
+                <span id="rotate-icon">▶️</span> Auto-Rotate
+            </button>
+            <button id="reset-view">
+                🔄 Reset View
+            </button>
+            <button id="zoom-in">
+                ➕ Zoom In
+            </button>
+            <button id="zoom-out">
+                ➖ Zoom Out
+            </button>
+            <button id="fullscreen" class="secondary">
+                ⛶ Fullscreen
+            </button>
+        </div>
+    </div>
     
     <script>
-      const modelViewer = document.querySelector('model-viewer');
-      
-      // Handle AR mode
-      modelViewer.addEventListener('ar-status', (event) => {
-        console.log('AR Status:', event.detail.status);
-      });
-      
-      // Handle model load
-      modelViewer.addEventListener('load', () => {
-        console.log('Model loaded successfully');
-      });
-      
-      // Handle errors
-      modelViewer.addEventListener('error', (event) => {
-        console.error('Model loading error:', event.detail);
-      });
+        const modelViewer = document.querySelector('model-viewer');
+        const rotateBtn = document.getElementById('rotate-btn');
+        const rotateIcon = document.getElementById('rotate-icon');
+        const resetViewBtn = document.getElementById('reset-view');
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+        const fullscreenBtn = document.getElementById('fullscreen');
+        
+        let isRotating = true;
+        
+        // Toggle auto-rotate
+        rotateBtn.addEventListener('click', () => {
+            isRotating = !isRotating;
+            modelViewer.autoRotate = isRotating;
+            rotateIcon.textContent = isRotating ? '▶️' : '⏸️';
+        });
+        
+        // Reset view
+        resetViewBtn.addEventListener('click', () => {
+            modelViewer.cameraOrbit = '45deg 60deg 2.5m';
+            modelViewer.cameraTarget = '0m 0m 0m';
+        });
+        
+        // Zoom controls
+        zoomInBtn.addEventListener('click', () => {
+            const orbit = modelViewer.getCameraOrbit();
+            modelViewer.cameraOrbit = `${orbit.theta}deg ${orbit.phi}deg ${Math.max(orbit.radius * 0.8, 0.5)}m`;
+        });
+        
+        zoomOutBtn.addEventListener('click', () => {
+            const orbit = modelViewer.getCameraOrbit();
+            modelViewer.cameraOrbit = `${orbit.theta}deg ${orbit.phi}deg ${orbit.radius * 1.2}m`;
+        });
+        
+        // Fullscreen
+        fullscreenBtn.addEventListener('click', () => {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                modelViewer.requestFullscreen();
+            }
+        });
+        
+        // Handle AR availability
+        const arButton = document.getElementById('ar-button');
+        
+        if (modelViewer.activateAR) {
+            arButton.style.display = 'block';
+        } else {
+            arButton.style.display = 'none';
+        }
+        
+        // Handle model load events
+        modelViewer.addEventListener('load', () => {
+            console.log('Model loaded successfully');
+        });
+        
+        modelViewer.addEventListener('error', (event) => {
+            console.error('Error loading model:', event.detail);
+            const loading = document.querySelector('.loading');
+            if (loading) {
+                loading.innerHTML = '❌ Error loading model. Please check console for details.';
+            }
+        });
+        
+        // Show loading state
+        modelViewer.addEventListener('progress', (event) => {
+            const progress = Math.round(event.detail.totalProgress * 100);
+            const loading = document.querySelector('.loading');
+            if (loading) {
+                loading.textContent = `Loading model... ${progress}%`;
+                if (progress >= 100) {
+                    loading.style.display = 'none';
+                }
+            }
+        });
     </script>
-  </body>
+</body>
 </html>
